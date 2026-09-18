@@ -1,0 +1,55 @@
+# ==============================================================================
+# .gitignore — Golden Ignore Rules for Flutter & Dart
+# ==============================================================================
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Visual Studio Code related
+.vscode/
+
+# Flutter / Dart / Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbol processing related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place these in the project directory
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Code coverage reports
+coverage/
+*.lcov
+lcov.info
+
+# Makelib internal scratch / cache
+.makelib-cache/
+pubspec.lock.bak
