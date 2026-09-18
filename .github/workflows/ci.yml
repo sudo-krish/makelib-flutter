@@ -1,0 +1,43 @@
+name: CI Quality Gate Pipeline
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  quality-gate:
+    name: 8-Stage Industrial Quality Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Set up Python for detect-secrets
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Security Tools
+        run: |
+          pip install detect-secrets
+
+      - name: Resolve Dependencies
+        run: make deps
+
+      - name: Execute 8-Stage Quality Gates
+        run: make check-all

@@ -1,0 +1,64 @@
+name: Release Automation Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Classify, Bump & Publish Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Configure Git User
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Resolve Dependencies
+        run: make deps
+
+      - name: Execute Full Quality Verification
+        run: make check-all
+
+      - name: Extract Release Version
+        id: semver
+        run: |
+          CURRENT_VER=$(bash scripts/semver-release.sh --current)
+          TAG_NAME="v${CURRENT_VER%%+*}"
+          echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=${CURRENT_VER}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Git Tag and Push
+        run: |
+          TAG="${{ steps.semver.outputs.tag }}"
+          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+            git tag -a "$TAG" -m "Release $TAG"
+            git push origin "$TAG"
+          else
+            echo "Tag $TAG already exists."
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.semver.outputs.tag }}
+          name: ${{ steps.semver.outputs.tag }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

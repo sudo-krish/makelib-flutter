@@ -1,0 +1,26 @@
+name: Template Sync Verification
+
+on:
+  schedule:
+    - cron: '0 4 * * 1' # Every Monday at 04:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check-sync:
+    name: Check Upstream Template Drift
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Golden Config Integrity
+        run: |
+          make sync-config
+          if ! git diff --quiet; then
+            echo "Configuration drift detected between upstream makelib-flutter and downstream repo."
+            git diff
+            exit 1
+          else
+            echo "All configurations are in sync with upstream makelib-flutter."
+          fi
